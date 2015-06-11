@@ -26,7 +26,8 @@
 
 window.DomPredictionHelper = class DomPredictionHelper
   recursiveNodes: (e) ->
-    if e.nodeName && e.parentNode && e != document.body
+    body = e.ownerDocument.body
+    if e.nodeName && e.parentNode && e != body
       n = @recursiveNodes(e.parentNode)
     else
       n = new Array()
