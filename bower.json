@@ -1,0 +1,17 @@
+{
+  "name": "selectorgadget",
+  "version": "1.0.0",
+  "homepage": "https://github.com/Youwotma/selectorgadget",
+  "authors": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "google-diff-match-patch-js": "~1.0.0"
+  }
+}
