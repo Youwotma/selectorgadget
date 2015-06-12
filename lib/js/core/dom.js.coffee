@@ -26,8 +26,7 @@
 
 window.DomPredictionHelper = class DomPredictionHelper
   recursiveNodes: (e) ->
-    body = e.ownerDocument.body
-    if e.nodeName && e.parentNode && e != body
+    if e.nodeName && e.parentElement && e.parentElement != e.ownerDocument.documentElement
       n = @recursiveNodes(e.parentNode)
     else
       n = new Array()
@@ -302,12 +301,40 @@ window.DomPredictionHelper = class DomPredictionHelper
         out.push @pathOf(node)
     out
 
+  commonAncestor: (elements) ->
+    candidates = elements.eq(0).parents()
+    for i in [candidates.length-2..0]
+      for j in [1..elements.length]
+        if not $.contains(candidates[i], elements[j])
+          return candidates[i+1]
+    return candidates[0]
+
+  mostProlificAntecestor: (element) ->
+    antecesors = element.parentsUntil(element[0].ownerDocument.documentElement)
+    candidate = antecesors[antecesors.length-1]
+    for i in [antecesors.length-2..0]
+      if candidate.childElementCount <= antecesors[i].childElementCount
+        candidate = antecesors[i]
+    return candidate
+
+  # finds elements that are not in scope
+  findRejectedByScope: (scope, tagName) ->
+    return $(tagName, scope.ownerDocument).not($(tagName, scope))
+
   # Takes wrapped
   predictCss: (s, r) ->
     return '' if s.length == 0
+    # If we only have selected elements, all of them with the same tagName
+    if r.length == 0 and s.filter((i, e) -> e.tagName != s[0].tagName).length == 0
+      if s.length > 1
+        scope = @commonAncestor(s)
+      else
+        scope = @mostProlificAntecestor(s)
+      r = @findRejectedByScope(scope, s[0].tagName)
+
     selected_paths = @getPathsFor(s)
     css = @cssDiff(selected_paths)
-    simplest = @simplifyCss(css, s, r)
+    simplest = @simplifyCss(css, s, r, scope)
 
     # Do we get off easy?
     return simplest if simplest.length > 0
